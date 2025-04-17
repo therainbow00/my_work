@@ -1,43 +1,51 @@
 package personal_practice.Java;
 
 import java.util.Random;
+import java.sql.*;
 
 public class NumberStuff
 {
-    public static void main(String[] args) 
+    public static void main(String[] args) throws SQLException
     {
         Random rand = new Random();
         Nums nums = new Nums();
         NumFunctions numFunctions = new NumFunctions();
-        int num = Integer.parseInt(args[0]);
-        
-        for (int i = 1; i <= num; i++) 
+        Total total = new Total();
+        if (args.length > 0)
         {
-            Total total = new Total();
-            //total = new Total(rand.nextInt(101));
-            SetNumbersInt(rand, numFunctions);
-            SetNumbersDecimal(rand, numFunctions);
-            PrintStuff(numFunctions, total, rand, i);
+            int num = Integer.parseInt(args[0]);
+
+            for (int i = 1; i <= num; i++) 
+            {
+                SetNumbers(rand, numFunctions);
+                PrintStuff(numFunctions, total, rand, i);
+            }
+            System.out.println(nums.Print());
         }
-        System.out.println(nums.Print());
+        else
+        {
+            SetNumbers(rand, numFunctions);
+            PrintStuff(numFunctions, total, rand, 1);
+            System.out.println(nums.Print());
+        }
     }
 
-    static void SetNumbersInt(Random rand, NumFunctions numFunctions) 
+    static void SetNumbers(Random rand, NumFunctions numFunctions) 
     {
-        int length;
-        length = rand.nextInt(100);
-        numFunctions.SetNum1Or3(length);
-        length = rand.nextInt(100);
-        numFunctions.SetNum2Or4(length);
-    }
-
-    static void SetNumbersDecimal(Random rand, NumFunctions numFunctions) 
-    {
-        double length;
-        length = rand.nextInt(100);
-        numFunctions.SetNum1Or3(length + .75);
-        length = rand.nextInt(100);
-        numFunctions.SetNum2Or4(length + .02);
+        int length = 0;
+        Double dec;
+        for (int i = 0; i < 2; i++)
+        {
+            length = rand.nextInt(100);
+            numFunctions.SetNum1Or3(length);
+            length = rand.nextInt(100);
+            dec = Double.parseDouble('.' + Integer.toString(rand.nextInt(99)));
+            numFunctions.SetNum2Or4(length + dec);
+            length = rand.nextInt(100);
+            numFunctions.SetNum2Or4(length);
+            dec = Double.parseDouble('.' + Integer.toString(rand.nextInt(99)));
+            numFunctions.SetNum1Or3(length + dec);
+        }
     }
 
     static void PrintStuff(NumFunctions numFunctions, Total total, Random rand, int index)
@@ -57,7 +65,7 @@ public class NumberStuff
         System.out.printf("The greater number is: %.0f (Number 3 was: %.0f | Number 4 was: %.0f)\n", numFunctions.Greater(numFunctions.GetNum3(), numFunctions.GetNum4()), numFunctions.GetNum3(), numFunctions.GetNum4());
 
         total.SetTotal(numFunctions.GetNum3(), numFunctions.GetNum4());
-        System.out.println("Total: " + total.GetTotalDouble());
+        System.out.printf("Total: %.2f\n", total.GetTotalDouble());
 
         for (int l = 1; l <= 70; l++) {System.out.print("=");}
 

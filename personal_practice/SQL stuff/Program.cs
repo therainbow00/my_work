@@ -15,6 +15,8 @@ namespace SQL_stuff
             string query = "select name from sys.databases";
 
             List<string> dataTableList = new List<string>();
+            List<string> tables = new List<string>();
+            string input;
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -23,24 +25,98 @@ namespace SQL_stuff
                 {
                     using (SqlDataReader reader = command3.ExecuteReader())
                     {
+                        int index = 0;
                         WriteLine("\t\tDatabase");
                         Write(new string('=', 50));
                         WriteLine();
                         while (reader.Read())
                         {
-                            WriteLine(reader["name"]);
+                            WriteLine($"{index} = {reader["name"]}");
                             dataTableList.Add(reader["name"].ToString());
+                            index++;
                         }
                     }
-                    GetAllTables(dataTableList[4], connectionString);
+                    Write("Choose database: ");
+                    input = ReadLine();
+                    int.TryParse(input, out int Input);
+                    WriteLine();
+                    WriteLine($"\t     Tables in {dataTableList[Input]}");
+                    Write(new string('=', 50));
+                    WriteLine();
+                    tables = GetAllTables(dataTableList[Input], connectionString);
                 }
-                ReadKey();
+                //ReadKey();
                 connection.Close();
             }
-            GetTable(8, connectionString);
+            WriteLine("What would you like to do");
+            WriteLine("0 - get specific table");
+            WriteLine("1 - get all users");
+            WriteLine("2 - get a user");
+            int answer;
+            string temp;
+            input = ReadLine();
+            int user = int.Parse(input);
+            switch (user)
+            {
+                case 0:
+                    Write("Enter table: ");
+                    temp = ReadLine();
+                    answer = int.Parse(temp);
+                    GetTable(answer, connectionString);
+                    break;
+                case 1:
+                    Write("Enter table to get all users: ");
+                    temp = ReadLine();
+                    answer = int.Parse(temp);
+                    GetAllUsers(tables[answer], connectionString);
+                    break;
+                case 2:
+                    Write("Enter user id: ");
+                    temp = ReadLine();
+                    answer = int.Parse(temp);
+                    GetUser(answer, connectionString);
+                    break;
+            }
+
+            ReadKey();
         }
 
-        static void GetAllUsers(int id, string connectionString)
+        static void GetAllUsers(string table, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                List<string> tables = new List<string>();
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand("select table_name from information_schema.tables", connection)) using (SqlDataReader reader = command.ExecuteReader()) while (reader.Read()) tables.Add(reader["table_name"].ToString());
+                string query = $"use data; select * from {table}";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader dataReader = command.ExecuteReader())
+                    {
+                        for (int i = 0; i < dataReader.FieldCount; i++)
+                        {
+                            if (i == (dataReader.FieldCount - 1)) Write($"{dataReader.GetName(i)}");
+                            else Write($"{dataReader.GetName(i)} | ");
+                        }
+                        while (dataReader.Read())
+                        {
+                            WriteLine();
+                            for (int i = 0; i < dataReader.FieldCount; i++)
+                            {
+                                if (i == (dataReader.FieldCount - 1)) Write($"{dataReader[i]}");
+                                else Write($"{dataReader[i]} | ");
+                            }
+                            WriteLine();
+                        }
+                    }
+                }
+                connection.Close();
+            }
+        }
+
+        static void GetUser(int id, string connectionString)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -72,7 +148,7 @@ namespace SQL_stuff
             }
         }
 
-        static void GetAllTables(string table, string connectionString)
+        static List<string> GetAllTables(string table, string connectionString)
         {
             List<string> tables = new List<string>();
 
@@ -81,8 +157,9 @@ namespace SQL_stuff
                 connection.Open();
                 using (SqlCommand command = new SqlCommand($"use {table}; select table_name from information_schema.tables", connection)) using (SqlDataReader reader = command.ExecuteReader()) while (reader.Read()) tables.Add(reader["table_name"].ToString());
 
-                for (int i = 0; i < tables.Count; i++) WriteLine(i + 1 + " - " + tables[i]);
+                for (int i = 0; i < tables.Count; i++) WriteLine(i + " - " + tables[i]);
                 connection.Close();
+                return tables;
             }
         }
 

@@ -1,0 +1,9 @@
+<link rel="stylesheet" href="\index.css"></link>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <form method="post" action="@{/index}">
+            <h1 th:text="${test.name}"></h1>
+            <h1 th:text="${test.age}"></h1>
+        </form>
+    </body>
+</html>
