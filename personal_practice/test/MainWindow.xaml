@@ -5,20 +5,60 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:test"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="test" Height="450" Width="800">
 	<!--<Grid>
 		<TextBox x:Name="test" HorizontalAlignment="Center" Margin="0,86,0,0" TextWrapping="Wrap" Text="test" VerticalAlignment="Top" Width="94" TextAlignment="Center" BorderBrush="#FF0040FF" Height="38" FontSize="20"/>
 		<Button x:Name="hello" Content="hello" HorizontalAlignment="Left" Margin="208,264,0,0" VerticalAlignment="Top" Click="Button_Click" Background="#FFFFFD00" FontSize="16"/>
 		<Button x:Name="here" Content="here" HorizontalAlignment="Left" Margin="555,267,0,0" VerticalAlignment="Top" Click="Button_Click_1" Background="#FF0079FF" FontSize="16"/>
 
 	</Grid>-->
-	<ListView Name="excelListView" Margin="10">
-		<ListView.View>
-			<GridView>
-				<GridViewColumn Header="id" DisplayMemberBinding="{Binding id}"/>
-				<GridViewColumn Header="name" DisplayMemberBinding="{Binding name}"/>
-				<GridViewColumn Header="accountstatus" DisplayMemberBinding="{Binding accountstatus}"/>
-			</GridView>
-		</ListView.View>
-	</ListView>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="2"/>
+			
+		</Grid.RowDefinitions>
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="5"/>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+
+			<ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" CanContentScroll="True" Margin="10">
+				<DataGrid x:Name="ExcelDataLeftGrid" AutoGenerateColumns="False" Margin="10">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="id" Binding="{Binding Id}"/>
+						<DataGridTextColumn Header="name" Binding="{Binding Name}"/>
+						<DataGridTextColumn Header="status" Binding="{Binding accountStatus}"/>
+						<DataGridTextColumn Header="action" Binding="{Binding action}"/>
+					</DataGrid.Columns>
+				</DataGrid>
+			</ScrollViewer>
+
+			<GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="10" />
+
+			<ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.ColumnSpan="2" Height="442" Margin="10" VerticalAlignment="Top">
+				<DataGrid x:Name="ExcelDataRightGrid" AutoGenerateColumns="False" Margin="10">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="id" Binding="{Binding Id}"/>
+						<DataGridTextColumn Header="name" Binding="{Binding Name}"/>
+						<DataGridTextColumn Header="status" Binding="{Binding accountStatus}"/>
+						<DataGridTextColumn Header="action" Binding="{Binding action}"/>
+					</DataGrid.Columns>
+				</DataGrid>
+			</ScrollViewer>
+
+		</Grid>
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" CanContentScroll="True" Margin="0,0,10,-403">
+			<DataGrid x:Name="ExcelDataBottomGrid" AutoGenerateColumns="False" Margin="10">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="id" Binding="{Binding Id}"/>
+					<DataGridTextColumn Header="name" Binding="{Binding Name}"/>
+					<DataGridTextColumn Header="status" Binding="{Binding accountStatus}"/>
+					<DataGridTextColumn Header="action" Binding="{Binding action}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+		</ScrollViewer>
+	</Grid>
 </Window>
