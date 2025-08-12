@@ -6,6 +6,7 @@ import { error1Component } from './error1/error1.component';
 import { error2Component } from './error2/error2.component';
 import { routeComponent } from './route/route.component';
 import { rulesComponent } from './rules/rules.component';
+import { HttpClientModule } from '@angular/common/http';
 
 export const routes: Routes = [
   {path: '', redirectTo: '/route', pathMatch: 'full'},
@@ -18,7 +19,8 @@ export const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  declarations: [],
+  imports: [RouterModule.forRoot(routes), HttpClientModule],
   exports: [RouterModule]
 })
 

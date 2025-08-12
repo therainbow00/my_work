@@ -3,3 +3,8 @@ body.text-center
   background-color: white;
   text-align: center;
 }
+a
+{
+  border: 15px solid black;
+  padding: 1%;
+}

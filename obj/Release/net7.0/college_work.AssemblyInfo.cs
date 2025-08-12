@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("college_work")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fd99472a02e8d0b5aa803dd16faa11a001833814")]
 [assembly: System.Reflection.AssemblyProductAttribute("college_work")]
 [assembly: System.Reflection.AssemblyTitleAttribute("college_work")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

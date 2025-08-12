@@ -6,8 +6,20 @@
              xmlns:local="clr-namespace:test"
              mc:Ignorable="d" Width="800" Height="450">
 	<Grid>
-		<TextBox x:Name="searchButton" HorizontalAlignment="Stretch" Margin="0,134,0,0" TextWrapping="Wrap" Text="Search" VerticalAlignment="Top" TextAlignment="Center" FontSize="48" Width="346" BorderBrush="{x:Null}"/>
-		<Button x:Name="_Computer" Content="Computer" HorizontalAlignment="Left" Click="ComputerSearch" FontSize="16" Height="57" Width="262" Foreground="Red" FontWeight="Bold" Margin="33,304,0,89"/>
-		<Button x:Name="Non_Computer" Content="NonComputer" FontSize="16" Height="57" Width="262" Foreground="Red" FontWeight="Bold" Margin="494,304,44,89"/>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		<TextBox Grid.Row="0" Grid.Column="1" x:Name="searchButton" Margin="0,10" TextWrapping="Wrap" Text="Search" TextAlignment="Center" FontSize="48" Width="346" BorderBrush="{x:Null}" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="50" MinHeight="50"/>
+		<Button Grid.Row="2" Grid.Column="0" x:Name="_Computer" Content="Computer" HorizontalAlignment="Left" Click="ComputerSearch" FontSize="16" Height="57" Width="262" Foreground="Red" FontWeight="Bold" Grid.ColumnSpan="2" Margin="0,10,0,10"/>
+		<Button Grid.Row="2" Grid.Column="1" x:Name="Non_Computer" Content="NonComputer" FontSize="16" Height="57" Width="262" Foreground="Red" FontWeight="Bold" Margin="311,10,0,10" HorizontalAlignment="Left" MinWidth="50" MinHeight="50" Grid.ColumnSpan="2"/>
 	</Grid>
 </UserControl>

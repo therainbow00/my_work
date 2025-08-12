@@ -5,21 +5,40 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:test"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="500" d:DesignWidth="800">
 	<Grid>
-		<TextBox HorizontalAlignment="Left" Text="Device Name" FontSize="18" TextAlignment="Center" TextWrapping="WrapWithOverflow" BorderBrush="{x:Null}" Background="Black" Foreground="White" Margin="51,268,0,136" Width="187"/>
-		<TextBox HorizontalAlignment="Left" Text="Make" FontSize="18" TextAlignment="Center" TextWrapping="WrapWithOverflow" BorderBrush="{x:Null}" Background="Black" Foreground="White" Margin="163,362,0,42" Width="150" TextChanged="TextBox_TextChanged"/>
-		<TextBox HorizontalAlignment="Left" Text="Model" FontSize="18" TextAlignment="Center" TextWrapping="WrapWithOverflow" BorderBrush="{x:Null}" Background="Black" Foreground="White" Margin="549,266,0,135" Width="171"/>
-		<TextBox Text="Serial Number" TextAlignment="Center" TextWrapping="WrapWithOverflow" BorderBrush="{x:Null}" Background="Black" Foreground="White" Margin="292,266,338,138" FontSize="17"/>
-		<TextBox HorizontalAlignment="Left" Text="Purchase Date" FontSize="18" TextAlignment="Center" TextWrapping="WrapWithOverflow" BorderBrush="{x:Null}" Background="Black" Foreground="White" Margin="476,362,0,42" Width="170"/>
-		<DataGrid x:Name="Inventory" Margin="0,0,0,203" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserAddRows="False">
+		<DataGrid x:Name="Inventory" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" MaxHeight="800" MinWidth="10" MinHeight="10" Margin="0,0,0,255" AutoGenerateColumns="False">
 			<DataGrid.Columns>
-				<DataGridTextColumn Header="Device Name" Binding="{Binding deviceName}"/>
-				<DataGridTextColumn Header="Make" Binding="{Binding Make}"/>
-				<DataGridTextColumn Header="Model" Binding="{Binding Model}"/>
-				<DataGridTextColumn Header="Serial Number" Binding="{Binding serialNumber}"/>
-				<DataGridTextColumn Header="Perchase Date" Binding="{Binding purchaseDate}"/>
+				<DataGridTextColumn Header="Device Name" Binding="{Binding deviceName}" Width="*"/>
+				<DataGridTextColumn Header="Make" Binding="{Binding Make}" Width="*"/>
+				<DataGridTextColumn Header="Model" Binding="{Binding Model}" Width="*"/>
+				<DataGridTextColumn Header="Serial Number" Binding="{Binding serialNumber}" Width="*"/>
+				<DataGridTextColumn Header="Purchase Date" Binding="{Binding purchaseDate}" Width="*"/>
 			</DataGrid.Columns>
 		</DataGrid>
+		<TextBox HorizontalAlignment="Left" Margin="75,345,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120" Height="32" MinHeight="20" MinWidth="115" TextAlignment="Center" Background="Black" Foreground="White"/>
+		<TextBox HorizontalAlignment="Left" Margin="555,345,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120" MinHeight="20" MinWidth="115"/>
+		<Menu Margin="374,269,374,208" VerticalAlignment="Stretch">
+			<MenuItem Header="Search">
+				<StackPanel>
+					<TextBlock Text="Device Name:" Margin="0,0,0,5"/>
+					<TextBox Width="150" Height="25" Name="DeviceName"/>
+
+					<TextBlock Text="Make:" Margin="0,10,0,5"/>
+					<TextBox Width="150" Height="25" Name="Make"/>
+
+					<TextBlock Text="Model:" Margin="0,10,0,5"/>
+					<TextBox Width="150" Height="25" Name="Model"/>
+
+					<TextBlock Text="Serial Number:" Margin="0,10,0,5"/>
+					<TextBox Width="150" Height="25" Name="SerialNumber"/>
+
+					<TextBlock Text="Perchase Date:" Margin="0,10,0,5"/>
+					<DatePicker Width="150" Height="25" Name="PurchaseDate" SelectedDateFormat="Short"/>
+
+					<Button Content="Submit" Width="100" Margin="0,10,0,0" Click="SubmitSearch_Click"/>
+				</StackPanel>
+			</MenuItem>
+		</Menu>
 	</Grid>
 </UserControl>
