@@ -76,37 +76,41 @@ namespace test
             }
             Inventory.ItemsSource = records;
         }
-        public void ComputerDatabase(string connectionString)
+        public void ComputerDatabase(string connectionString, bool isConnected)
         {
             var records = new List<Computer>();
             using (SqlConnection connect = new SqlConnection(connectionString))
             {
-                try
+                if (isConnected)
                 {
-                    connect.Open();
-                    string query = "SELECT * FROM assetTracker";
-                    SqlCommand command = new SqlCommand(query, connect);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    try
                     {
-                        while (reader.Read())
+                        connect.Open();
+                        string query = "SELECT * FROM assetTracker";
+                        SqlCommand command = new SqlCommand(query, connect);
+                        using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            var record = new Computer
+                            while (reader.Read())
                             {
-                                deviceName = reader["deviceName"].ToString(),
-                                Make = reader["Make"].ToString(),
-                                Model = reader["Model"].ToString(),
-                                serialNumber = reader["serialNumber"].ToString(),
-                                perchaseDate = DateTime.Parse(reader["purchaseDate"].ToString()).ToShortDateString()
-                            };
+                                var record = new Computer
+                                {
+                                    deviceName = reader["deviceName"].ToString(),
+                                    Make = reader["Make"].ToString(),
+                                    Model = reader["Model"].ToString(),
+                                    serialNumber = reader["serialNumber"].ToString(),
+                                    perchaseDate = DateTime.Parse(reader["purchaseDate"].ToString()).ToShortDateString()
+                                };
 
-                            records.Add(record);
+                                records.Add(record);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error retrieving data: {ex.Message}", "SQL Data Retrieval");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error retrieving data: {ex.Message}", "SQL Data Retrieval");
-                }
+                else MessageBox.Show("data not retrieved", "SQL Data Retrieval");
             }
             Inventory.ItemsSource = records;
         }
@@ -124,7 +128,7 @@ namespace test
             }
         }
 
-        private void databaseConnect(string connectionString)
+        private bool databaseConnect(string connectionString, bool isConnected)
         {
             //string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
             using (SqlConnection connect = new SqlConnection(connectionString))
@@ -136,6 +140,7 @@ namespace test
                     {
                         MessageBox.Show("Connected to the database", "DATABASE CONNECTION");
                         StatusLight.Fill = Brushes.Green;
+                        isConnected = true;
                     }
                     else
                     {
@@ -144,10 +149,12 @@ namespace test
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Couldn't connect to DATABASE: {ex.Message}", "SQL connect");
+                    MessageBox.Show($"Couldn't connect to DATABASE: {ex.Message}", "DATABASE CONNECTION");
                     StatusLight.Fill = Brushes.Red;
+                    isConnected = false;
                 }
             }
+            return isConnected;
         }
 
         private void ChooseOptions(object sender, EventArgs e)
@@ -157,8 +164,8 @@ namespace test
             switch (result)
             {
                 case MessageBoxResult.Yes:
-                    databaseConnect(connectionString);
-                    ComputerDatabase(connectionString);
+                    bool isConnected = false;
+                    ComputerDatabase(connectionString, databaseConnect(connectionString, isConnected));
                     break;
                 case MessageBoxResult.No:
                     StatusLight.Fill = Brushes.Orange;
