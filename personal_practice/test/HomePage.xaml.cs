@@ -35,19 +35,19 @@ namespace test
 
         public class Computer
         {
-            public string deviceName { get; set; }
-            public string Make { get; set; }
-            public string Model { get; set; }
-            public string serialNumber { get; set; }
-            public string perchaseDate { get; set; }
+            public required string deviceName { get; set; }
+            public required string Make { get; set; }
+            public required string Model { get; set; }
+            public required string serialNumber { get; set; }
+            public string? perchaseDate { get; set; }
         }
         public class NonComputer
         {
-            public string deviceName { get; set; }
-            public string Make { get; set; }
-            public string Model { get; set; }
-            public string serialNumber { get; set; }
-            public string perchaseDate { get; set; }
+            public required string deviceName { get; set; }
+            public required string Make { get; set; }
+            public required string Model { get; set; }
+            public required string serialNumber { get; set; }
+            public string? perchaseDate { get; set; }
         }
 
         public void ComputerExcel(string path)
@@ -94,11 +94,11 @@ namespace test
                             {
                                 var record = new Computer
                                 {
-                                    deviceName = reader["deviceName"].ToString(),
-                                    Make = reader["Make"].ToString(),
-                                    Model = reader["Model"].ToString(),
-                                    serialNumber = reader["serialNumber"].ToString(),
-                                    perchaseDate = DateTime.Parse(reader["purchaseDate"].ToString()).ToShortDateString()
+                                    deviceName = reader["Device Name"]?.ToString(),
+                                    Make = reader["Make"]?.ToString(),
+                                    Model = reader["Model"]?.ToString(),
+                                    serialNumber = reader["Serial Number"]?.ToString(),
+                                    perchaseDate = Convert.ToDateTime(reader["Purchase Date"]).ToShortDateString()
                                 };
 
                                 records.Add(record);
@@ -117,6 +117,7 @@ namespace test
 
         private void SubmitSearch_Click(object sender, RoutedEventArgs e)
         {
+            string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
             string deviceName = DeviceName.Text;
             string serialNumber = SerialNumber.Text;
             string make = Make.Text;
@@ -124,6 +125,37 @@ namespace test
             DateTime? perchaseDate = PurchaseDate.SelectedDate;
             if (string.IsNullOrWhiteSpace(deviceName) || string.IsNullOrWhiteSpace(serialNumber) || string.IsNullOrWhiteSpace(make) || string.IsNullOrWhiteSpace(model) || string.IsNullOrWhiteSpace(deviceName))
             {
+                var records = new List<Computer>();
+                using (SqlConnection connect = new SqlConnection(connectionString))
+                {
+                    try
+                    {
+                        connect.Open();
+                        string query = $"SELECT * FROM assetTracker where [device name] = '{deviceName}'";
+                        SqlCommand command = new SqlCommand(query, connect);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var record = new Computer
+                                {
+                                    deviceName = reader["Device Name"]?.ToString(),
+                                    Make = reader["Make"]?.ToString(),
+                                    Model = reader["Model"]?.ToString(),
+                                    serialNumber = reader["Serial Number"]?.ToString(),
+                                    perchaseDate = Convert.ToDateTime(reader["Purchase Date"]).ToShortDateString()
+                                };
+                    
+                                records.Add(record);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error retrieving data: {ex.Message}", "SQL Data Retrieval");
+                    }
+                }
+                Inventory.ItemsSource = records;
                 MessageBox.Show($"Searching for device: {deviceName}, Serial: {serialNumber}, Make: {make}, Model: {model}, date: {perchaseDate?.ToShortDateString()}");
             }
         }
