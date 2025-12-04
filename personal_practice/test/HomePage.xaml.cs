@@ -68,7 +68,7 @@ namespace test
                         Make = worksheet.Cells[i, 2].Text,
                         Model = worksheet.Cells[i, 3].Text,
                         serialNumber = worksheet.Cells[i, 4].Text, 
-                        perchaseDate = DateTime.Parse(worksheet.Cells[i, 5].Text).ToShortDateString()
+                        perchaseDate = DateTime.Parse(worksheet.Cells[i, 5].Text).ToShortDateString() ?? string.Empty
                     };
 
                     records.Add(record);
@@ -94,11 +94,11 @@ namespace test
                             {
                                 var record = new Computer
                                 {
-                                    deviceName = reader["Device Name"]?.ToString(),
-                                    Make = reader["Make"]?.ToString(),
-                                    Model = reader["Model"]?.ToString(),
-                                    serialNumber = reader["Serial Number"]?.ToString(),
-                                    perchaseDate = Convert.ToDateTime(reader["Purchase Date"]).ToShortDateString()
+                                    deviceName = reader.IsDBNull(reader.GetOrdinal("Device Name"))? string.Empty : reader.GetString(reader.GetOrdinal("Device Name")),
+                                    Make = reader.IsDBNull(reader.GetOrdinal("Make"))? string.Empty : reader.GetString(reader.GetOrdinal("Make")),
+                                    Model = reader.IsDBNull(reader.GetOrdinal("Model")) ? string.Empty : reader.GetString(reader.GetOrdinal("Model")),
+                                    serialNumber = reader.IsDBNull(reader.GetOrdinal("Serial Number")) ? string.Empty : reader.GetString(reader.GetOrdinal("Serial Number")),
+                                    perchaseDate = reader["Purchase Date"] != DBNull.Value ? Convert.ToDateTime(reader["Purchase Date"]).ToShortDateString() : null
                                 };
 
                                 records.Add(record);
