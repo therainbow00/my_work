@@ -12,6 +12,10 @@
     <PackageReference Include="EPPlus" Version="8.0.3" />
     <PackageReference Include="IronXL.Excel" Version="2025.4.5" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.79.2" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.1.1" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="4.1.1" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
