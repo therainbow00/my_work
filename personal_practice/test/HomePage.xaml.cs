@@ -31,6 +31,7 @@ namespace test
         bool isConnected = false;
         bool defaultLoop = false;
         public DateTime? perchaseDate;
+        string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
         public HomePage()
         {
             InitializeComponent();
@@ -43,7 +44,7 @@ namespace test
             public required string Make { get; set; }
             public required string Model { get; set; }
             public required string serialNumber { get; set; }
-            public DateTime? perchaseDate { get; set; }
+            public string? perchaseDate { get; set; }
         }
         public class NonComputer
         {
@@ -51,7 +52,7 @@ namespace test
             public required string Make { get; set; }
             public required string Model { get; set; }
             public required string serialNumber { get; set; }
-            public DateTime? perchaseDate { get; set; }
+            public string? perchaseDate { get; set; }
         }
 
         public void ComputerExcel(string path)
@@ -72,7 +73,7 @@ namespace test
                         Make = worksheet.Cells[i, 2].Text,
                         Model = worksheet.Cells[i, 3].Text,
                         serialNumber = worksheet.Cells[i, 4].Text, 
-                        perchaseDate = worksheet.Cells[i, 5].Text != string.Empty ? Convert.ToDateTime(worksheet.Cells[i, 5].Text) : null
+                        perchaseDate = worksheet.Cells[i, 5].Text != string.Empty ? Convert.ToDateTime(worksheet.Cells[i, 5].Text).ToShortDateString() : null
                     };
 
                     records.Add(record);
@@ -82,23 +83,8 @@ namespace test
         }
 
         // make optional parameters so callers can pass fewer args
-        public void ComputerDatabase(string connectionString, bool isConnected, DateTime? PerchaseDate, string DeviceName = "", string Make = "", string Model = "", string SerialNumber = "", bool submitSearchButton = false)
+        public void ComputerDatabase(string connectionString, bool isConnected, DateTime? PerchaseDateFrom, DateTime? PerchaseDateTo, string DeviceName = "", string SerialNumber = "", string Make = "", string Model = "", bool submitSearchButton = false)
         {
-            if (!submitSearchButton)
-            {
-                bool perchaseDateBool = false;
-                bool deviceNameBool = false;
-                bool makeBool = false;
-                bool modelBool = false;
-                bool serialNumberBool = false;
-
-                if (!PerchaseDate.HasValue) perchaseDateBool = false; PerchaseDate = null;
-                if (string.IsNullOrWhiteSpace(DeviceName)) deviceNameBool = false; DeviceName = "";
-                if (string.IsNullOrWhiteSpace(Make)) makeBool = false; Make = "";
-                if (string.IsNullOrWhiteSpace(Model)) modelBool = false; Model = "";
-                if (string.IsNullOrWhiteSpace(SerialNumber)) serialNumberBool = false; SerialNumber = "";
-            }
-
             var records = new List<Computer>();
             if (!submitSearchButton)
             {
@@ -121,7 +107,7 @@ namespace test
                                         Make = reader.IsDBNull(reader.GetOrdinal("Make")) ? string.Empty : reader.GetString(reader.GetOrdinal("Make")),
                                         Model = reader.IsDBNull(reader.GetOrdinal("Model")) ? string.Empty : reader.GetString(reader.GetOrdinal("Model")),
                                         serialNumber = reader.IsDBNull(reader.GetOrdinal("Serial Number")) ? string.Empty : reader.GetString(reader.GetOrdinal("Serial Number")),
-                                        perchaseDate = reader["Purchase Date"] != DBNull.Value ? Convert.ToDateTime(reader["Purchase Date"]) : null
+                                        perchaseDate = reader["Purchase Date"] != DBNull.Value ? Convert.ToDateTime(reader["Purchase Date"]).ToShortDateString() : null
                                     };
 
                                     records.Add(record);
@@ -135,8 +121,8 @@ namespace test
                     }
                     else MessageBox.Show("data not retrieved", "SQL Data Retrieval");
                 }
-                defaultLoop = false;
                 MessageBox.Show("Initinal data retrieved", "SQL Data Retrieval");
+                Inventory.ItemsSource = records;
             }
             else
             {
@@ -144,31 +130,65 @@ namespace test
                 {
                     if (isConnected)
                     {
-                        try
+                        var quaryConditions = new List<string>();
+                        using (SqlCommand quaryCommand = new SqlCommand())
                         {
-                            connect.Open();
-                            string query = $"SELECT {DeviceName}, {Make}, {Model}, {SerialNumber}, {PerchaseDate} FROM assetTracker";
-                            SqlCommand command = new SqlCommand(query, connect);
-                            using (SqlDataReader reader = command.ExecuteReader())
+                            if (!string.IsNullOrWhiteSpace(DeviceName))
                             {
-                                while (reader.Read())
+                                quaryConditions.Add($"[device name] like @DeviceName");
+                                quaryCommand.Parameters.AddWithValue("@DeviceName", $"%{DeviceName}%");
+                            }
+                            if (!string.IsNullOrWhiteSpace(Make))
+                            {
+                                quaryConditions.Add($"make like @Make");
+                                quaryCommand.Parameters.AddWithValue("@Make", $"%{Make}%");
+                            }
+                            if (!string.IsNullOrWhiteSpace(Model))
+                            {
+                                quaryConditions.Add($"model like @Model");
+                                quaryCommand.Parameters.AddWithValue("@Model", $"%{Model}%");
+                            }
+                            if (!string.IsNullOrWhiteSpace(SerialNumber))
+                            {
+                                quaryConditions.Add($"[serial number] like @SerialNumber");
+                                quaryCommand.Parameters.AddWithValue("@SerialNumber", $"%{SerialNumber}%");
+                            }
+                            if (PerchaseDateFrom.HasValue)
+                            {
+                                quaryConditions.Add($"[purchase date] like @PerchaseDateFrom");
+                                quaryCommand.Parameters.AddWithValue("@PerchaseDateFrom", $"%{PerchaseDateFrom.Value}%");
+                            }
+                            if (PerchaseDateTo.HasValue)
+                            {
+                                quaryConditions.Add($"[purchase date] like @PerchaseDateTo");
+                                quaryCommand.Parameters.AddWithValue("@PerchaseDateTo", $"%{PerchaseDateTo.Value}%");
+                            }
+                            string baseQuary = quaryConditions.Count > 0 ? "WHERE " + string.Join(" AND ", quaryConditions) : string.Empty;
+                            quaryCommand.CommandText = $"SELECT [device name], make, model, [serial number], [purchase date] FROM assetTracker {baseQuary}";
+                            quaryCommand.Connection = connect;
+                            try
+                            {
+                                connect.Open();
+                                using (SqlDataReader reader = quaryCommand.ExecuteReader())
                                 {
-                                    var record = new Computer
+                                    while (reader.Read())
                                     {
-                                        deviceName = reader.IsDBNull(reader.GetOrdinal("Device Name")) ? string.Empty : reader.GetString(reader.GetOrdinal("Device Name")),
-                                        Make = reader.IsDBNull(reader.GetOrdinal("Make")) ? string.Empty : reader.GetString(reader.GetOrdinal("Make")),
-                                        Model = reader.IsDBNull(reader.GetOrdinal("Model")) ? string.Empty : reader.GetString(reader.GetOrdinal("Model")),
-                                        serialNumber = reader.IsDBNull(reader.GetOrdinal("Serial Number")) ? string.Empty : reader.GetString(reader.GetOrdinal("Serial Number")),
-                                        perchaseDate = reader["Purchase Date"] != DBNull.Value ? Convert.ToDateTime(reader["Purchase Date"]) : null
-                                    };
-
-                                    records.Add(record);
+                                        var record = new Computer
+                                        {
+                                            deviceName = reader.IsDBNull(reader.GetOrdinal("Device Name")) ? string.Empty : reader.GetString(reader.GetOrdinal("Device Name")),
+                                            Make = reader.IsDBNull(reader.GetOrdinal("Make")) ? string.Empty : reader.GetString(reader.GetOrdinal("Make")),
+                                            Model = reader.IsDBNull(reader.GetOrdinal("Model")) ? string.Empty : reader.GetString(reader.GetOrdinal("Model")),
+                                            serialNumber = reader.IsDBNull(reader.GetOrdinal("Serial Number")) ? string.Empty : reader.GetString(reader.GetOrdinal("Serial Number")),
+                                            perchaseDate = reader["Purchase Date"] != DBNull.Value ? Convert.ToDateTime(reader["Purchase Date"]).ToShortDateString() : null
+                                        };
+                                        records.Add(record);
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"Error retrieving data: {ex.Message}", "SQL Data Retrieval");
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Error retrieving data: {ex.Message}");
+                            }
                         }
                     }
                     else MessageBox.Show("data not retrieved", "SQL Data Retrieval");
@@ -180,17 +200,77 @@ namespace test
         private void SubmitSearch_Click(object sender, RoutedEventArgs e)
         {
             bool submitSearchButton = true;
-            string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
+            //string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
             string deviceName = DeviceName.Text;
             string serialNumber = SerialNumber.Text;
             string make = Make.Text;
             string model = Model.Text;
-            DateTime? perchaseDate = PurchaseDate.SelectedDate;
-            if (string.IsNullOrWhiteSpace(deviceName) || string.IsNullOrWhiteSpace(serialNumber) || string.IsNullOrWhiteSpace(make) || string.IsNullOrWhiteSpace(model) || !PurchaseDate.SelectedDate.HasValue)
+            DateTime? perchaseDateFrom = PurchaseDate.SelectedDate;
+            DateTime? perchaseDateTo = PurchaseDateTo.SelectedDate;
+            if (string.IsNullOrWhiteSpace(deviceName) || string.IsNullOrWhiteSpace(serialNumber) || string.IsNullOrWhiteSpace(make) || string.IsNullOrWhiteSpace(model) || !PurchaseDate.SelectedDate.HasValue || !PurchaseDateTo.SelectedDate.HasValue)
             {
-                ComputerDatabase(connectionString, isConnected, perchaseDate, deviceName, serialNumber, make, model, submitSearchButton);
+                ComputerDatabase(connectionString, isConnected, perchaseDateFrom, perchaseDateTo, deviceName, serialNumber, make, model, submitSearchButton);
                 //Inventory.ItemsSource = records;
-                MessageBox.Show($"Searching for device: {deviceName}, Serial: {serialNumber}, Make: {make}, Model: {model}, date: {perchaseDate?.ToShortDateString()}");
+
+                //string message = $"Searched for device: {deviceName}, Serial: {serialNumber}, Make: {make}, Model: {model}, date: {perchaseDate?.ToShortDateString()}";
+                var messageOptions = new List<string>();
+
+                if (string.IsNullOrWhiteSpace(deviceName))
+                {
+                    deviceName = "None";
+                    messageOptions.Add($"Device Name: {deviceName}");
+                }
+                else
+                {
+                    messageOptions.Add($"Device Name: {deviceName}");
+                }
+                if (!perchaseDateFrom.HasValue)
+                {
+                    string perchaseDateStringFrom = "None";
+                    messageOptions.Add($"Purchase Date From: {perchaseDateStringFrom}");
+                }
+                else
+                {
+                    messageOptions.Add($"Purchase Date From: {perchaseDateFrom.ToString}");
+                }
+                if (!perchaseDateTo.HasValue)
+                {
+                    string perchaseDateStringTo = "None";
+                    messageOptions.Add($"Purchase Date From: {perchaseDateStringTo}");
+                }
+                else
+                {
+                    messageOptions.Add($"Purchase Date To: {perchaseDateTo.ToString}");
+                }
+                if (string.IsNullOrWhiteSpace(serialNumber))
+                {
+                    serialNumber = "None";
+                    messageOptions.Add($"Serial Number: {serialNumber}");
+                }
+                else
+                {
+                    messageOptions.Add($"Serial Number: {serialNumber}");
+                }
+                if (string.IsNullOrWhiteSpace(make))
+                {
+                    make = "None";
+                    messageOptions.Add($"Make: {make}");
+                }
+                else
+                {
+                    messageOptions.Add($"Make: {make}");
+                }
+                if (string.IsNullOrWhiteSpace(model))
+                {
+                    model = "None";
+                    messageOptions.Add($"Model: {model}");
+                }
+                else
+                {
+                    messageOptions.Add($"Model: {model}");
+                }
+                string message = $"Searched for: {string.Join(", ", messageOptions)}";
+                MessageBox.Show(message);
             }
             submitSearchButton = false;
         }

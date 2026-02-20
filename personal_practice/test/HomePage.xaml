@@ -35,8 +35,11 @@
 					<TextBlock Text="Serial Number:" Margin="0,10,0,5"/>
 					<TextBox Width="150" Height="25" Name="SerialNumber"/>
 
-					<TextBlock Text="Perchase Date:" Margin="0,10,0,5"/>
+					<TextBlock Text="Perchase Date From:" Margin="0,10,0,5"/>
 					<DatePicker Width="150" Height="25" Name="PurchaseDate" SelectedDateFormat="Short"/>
+
+					<TextBlock Text="Perchase Date To:" Margin="0,10,0,5"/>
+					<DatePicker Width="150" Height="25" Name="PurchaseDateTo"/>
 
 					<Button Content="Submit" Width="100" Margin="0,10,0,0" Click="SubmitSearch_Click"/>
 				</StackPanel>
