@@ -119,7 +119,7 @@ namespace test
                             MessageBox.Show($"Error retrieving data: {ex.Message}", "SQL Data Retrieval");
                         }
                     }
-                    else MessageBox.Show("data not retrieved", "SQL Data Retrieval");
+                    else MessageBox.Show("data not retrieved: not connected to database", "SQL Data Retrieval");
                 }
                 MessageBox.Show("Initinal data retrieved", "SQL Data Retrieval");
                 Inventory.ItemsSource = records;
@@ -153,12 +153,18 @@ namespace test
                                 quaryConditions.Add($"[serial number] like @SerialNumber");
                                 quaryCommand.Parameters.AddWithValue("@SerialNumber", $"%{SerialNumber}%");
                             }
-                            if (PerchaseDateFrom.HasValue)
+                            if (PerchaseDateFrom.HasValue && PerchaseDateTo.HasValue)
+                            {
+                                quaryConditions.Add($"[purchase date] between @PerchaseDateFrom and @PerchaseDateTo");
+                                quaryCommand.Parameters.AddWithValue("@PerchaseDateFrom", PerchaseDateFrom.Value);
+                                quaryCommand.Parameters.AddWithValue("@PerchaseDateTo", PerchaseDateTo.Value);
+                            }
+                            else if (PerchaseDateFrom.HasValue)
                             {
                                 quaryConditions.Add($"[purchase date] like @PerchaseDateFrom");
                                 quaryCommand.Parameters.AddWithValue("@PerchaseDateFrom", $"%{PerchaseDateFrom.Value}%");
                             }
-                            if (PerchaseDateTo.HasValue)
+                            else if (PerchaseDateTo.HasValue)
                             {
                                 quaryConditions.Add($"[purchase date] like @PerchaseDateTo");
                                 quaryCommand.Parameters.AddWithValue("@PerchaseDateTo", $"%{PerchaseDateTo.Value}%");
@@ -312,7 +318,7 @@ namespace test
                 case MessageBoxResult.Yes:
                     //bool isConnected = false;
                     databaseConnect(connectionString);
-                    ComputerDatabase(connectionString, isConnected, perchaseDate);
+                    ComputerDatabase(connectionString, isConnected, PurchaseDate.SelectedDate, PurchaseDateTo.SelectedDate, DeviceName.Text, SerialNumber.Text, Make.Text, Model.Text);
                     break;
                 case MessageBoxResult.No:
                     StatusLight.Fill = Brushes.Orange;
@@ -321,6 +327,11 @@ namespace test
                     ComputerExcel(path);
                     break;
             }
+        }
+
+        private void ToggleSearch_Click(object sender, RoutedEventArgs e)
+        {
+            SearchPanel.Visibility = SearchPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }
