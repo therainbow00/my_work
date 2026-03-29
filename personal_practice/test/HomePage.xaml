@@ -8,6 +8,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800"
 			 MinHeight="50" MinWidth="50">
+	<UserControl.Resources>
+		<Storyboard x:Key="PulseStoryboard" RepeatBehavior="Forever" AutoReverse="True">
+			<DoubleAnimation Storyboard.TargetName="StatusLight" Storyboard.TargetProperty="Width" From="12" To="18" Duration="0:0:0.6" />
+			<DoubleAnimation Storyboard.TargetName="StatusLight" Storyboard.TargetProperty="Height" From="12" To="18" Duration="0:0:0.6" />
+		</Storyboard>
+	</UserControl.Resources>
 	<DockPanel x:Name="RootDock">
 		<Border x:Name="SearchPanel"
 			Background="LightGray"
@@ -68,18 +74,32 @@
 					<DataGridTextColumn Header="Perchase Date" Binding="{Binding perchaseDate}" Width="*"/>
 				</DataGrid.Columns>
 			</DataGrid>
-			<Ellipse x:Name="StatusLight"
+			<Border x:Name="StatusPanel"
+				 Background="Transparent"
+				 Padding="6"
+				 CornerRadius="6"
+				 HorizontalAlignment="Left"
+				 VerticalAlignment="Bottom"
+				 Margin="10"
+				 BorderBrush="Transparent"
+				ToolTip="Database Connection Status">
+			 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<Ellipse x:Name="StatusLight" Width="12" Height="12" Fill="Gray" Margin="0,0,10,0"/>
+					<TextBlock x:Name="StatusText" Text="Disconnected" FontWeight="Bold" VerticalAlignment="Center"/>
+			 </StackPanel>
+				<!--<Ellipse x:Name="StatusLight"
 					 MaxHeight="50"
 					 MaxWidth="50"
 					 Margin="-6,458,744,0"/>
 			<TextBlock x:Name="StatusText"
 					   Margin="65,477,663,0"
 					   Text="Database"
-					   TextAlignment="Center"/>
-			<!--!<Menu Margin="374,269,374,208" MaxHeight="50" MaxWidth="50">
+					   TextAlignment="Center"/>-->
+				<!--!<Menu Margin="374,269,374,208" MaxHeight="50" MaxWidth="50">
 				<MenuItem Header="Search">-->
-		<!--</MenuItem>-->
-		<!--!</Menu>-->
+				<!--</MenuItem>-->
+				<!--!</Menu>-->
+			</Border>
 		</Grid>
 	</DockPanel>
 </UserControl>

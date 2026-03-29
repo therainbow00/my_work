@@ -1,9 +1,15 @@
-﻿using OfficeOpenXml;
+﻿using Google.Protobuf;
+using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,14 +18,10 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Data;
-using System.Configuration;
-using Microsoft.Data.SqlClient;
-using System.Security.Principal;
-using Microsoft.Identity.Client;
 
 namespace test
 {
@@ -31,7 +33,7 @@ namespace test
         bool isConnected = false;
         bool defaultLoop = false;
         public DateTime? perchaseDate;
-        string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
+        string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=true;";
         public HomePage()
         {
             InitializeComponent();
@@ -53,6 +55,32 @@ namespace test
             public required string Model { get; set; }
             public required string serialNumber { get; set; }
             public string? perchaseDate { get; set; }
+        }
+
+        private void UpdateConnectionIndicator(bool connected, string messgae = "")
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (connected)
+                {
+                    StatusLight.Fill = Brushes.Green;
+                    StatusText.Text = messgae ?? "Connected";
+                    StatusPanel.BorderBrush = Brushes.Green;
+
+                    if (TryFindResource("PluseStoryboard") is Storyboard storyboard) storyboard.Begin(this, true);
+                }
+                else
+                {
+                    StatusLight.Fill = Brushes.Red;
+                    StatusText.Text = messgae ?? "Disconnected";
+                    StatusPanel.BorderBrush = Brushes.Orange;
+
+                    if (TryFindResource("PulseStoryboard") is Storyboard storyboard)
+                    {
+                        storyboard.Stop(this);
+                    }
+                }
+            });
         }
 
         public void ComputerExcel(string path)
@@ -292,18 +320,24 @@ namespace test
                     if (connect.State == ConnectionState.Open)
                     {
                         MessageBox.Show("Connected to the database", "DATABASE CONNECTION");
-                        StatusLight.Fill = Brushes.Green;
+                        UpdateConnectionIndicator(true, "Connected");
                         isConnected = true;
                     }
                     else
                     {
-                        StatusLight.Fill = Brushes.Orange;
+                        UpdateConnectionIndicator(false, "Connected, no data retrived");
+                        isConnected = false;
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Couldn't connect to DATABASE: {ex.Message}", "DATABASE CONNECTION");
                     StatusLight.Fill = Brushes.Red;
+                    StatusText.Text = "Connection Failed";
+                    StatusPanel.BorderBrush = Brushes.Red;
+                    StatusPanel.Background = Brushes.LightPink;
+
+                    if (TryFindResource("PluseStoryboard") is Storyboard storyboard) storyboard.Stop(this);
                     isConnected = false;
                 }
             };
@@ -311,7 +345,7 @@ namespace test
 
         private void ChooseOptions(object sender, EventArgs e)
         {
-            string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
+            //string connectionString = @"server=localhost\SQLEXPRESS;database=data;Trusted_Connection=True;TrustServerCertificate=True;";
             MessageBoxResult result = MessageBox.Show("Would you like to connect using SQL??", "Data Search using SQL", MessageBoxButton.YesNo, MessageBoxImage.Question);
             switch (result)
             {
@@ -319,6 +353,8 @@ namespace test
                     //bool isConnected = false;
                     databaseConnect(connectionString);
                     ComputerDatabase(connectionString, isConnected, PurchaseDate.SelectedDate, PurchaseDateTo.SelectedDate, DeviceName.Text, SerialNumber.Text, Make.Text, Model.Text);
+
+                    if (TryFindResource("PulseStorybpard") is Storyboard storyboard) storyboard.Stop(this);
                     break;
                 case MessageBoxResult.No:
                     StatusLight.Fill = Brushes.Orange;
